@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security.xsd">
+        
+    <!-- 검사 URL -->
+    <http auto-config="true" use-expressions="true">
+        <intercept-url pattern="/login/loginForm" access="permitAll" /><!--모두에게 허용 -->
+        <intercept-url pattern="/" access="permitAll" />
+        <intercept-url pattern="/admin/**" access="hasRole('ADMIN')" /> <!-- admin 관리자에게만 -->
+     	<intercept-url pattern="/**" access="hasAnyRole('USER, ADMIN')" />
+        
+        <!-- 읽는 순서는 위에서부터! 네번째 줄을 맨위에 쓰게되면 오류가 생긴다!!!  적용되는 순서는 가장 제한적인것부터 넓은 범ㅣ-->
+        
+        <!-- 로그인 인증을 처리할 주소는 /login/loginForm 이다. -->
+        <!-- default-target-url : 로그인이 완료되면 "/" 로 이동 -->
+        <!-- authentication-failure-url : 인증 실패시 가야하는 주소 : "/login/loginForm?error"  -->
+        <!-- username-paramete : 로그인 폼 아이디 입력 필드에 사용 될 name. 기본값은 "username"  -->
+        <!-- password-parameter : 로그인 폼 아이디 입력 필드에 사용 될 name. 기본값은 "password"  -->
+        
+        <form-login login-page="/login/loginForm"
+                    default-target-url="/"
+                    authentication-failure-url="/login/loginForm?error"
+                    username-parameter="id"
+                    password-parameter="password" />
+        
+        <logout logout-url="/logout"
+                logout-success-url="/" />  <!-- home.jsp의 logout과 맞춘것 -->
+                
+        <access-denied-handler error-page="/login/accessDenied" />
+        <!--  access가 거부된 사용자가 들어올때, 내부적으로 에러페이지 주소를 지정해서 넘겨줄수있음 -->
+        
+    </http>
+    
+ <!--    JDBC를 이용한 인증/권한 처리 
+  		  1) 지정된 형식으로 테이블을 생성하는 방법
+  		  2) 기존에 작성도니 데이터베이스에 연동하는 방법
+  		  
+  		  1번 방식의 경우: 지정된 형식으로 table 작성후 아래와 같이 데이터 베이스만 영동시켜도 됨
+  		  >> userName, password, enabled, authority는 Spring에서 지정된 컬럼명! 
+  		  
+  		  
+  -->	    
+
+ 	<beans:bean id="userDetailsService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSource"/>
+    </beans:bean> 
+
+    
+    <authentication-manager> 
+		<authentication-provider>
+			<jdbc-user-service 
+	            data-source-ref="dataSource"
+	            role-prefix=""
+	            users-by-username-query="select username, password, enabled from users where username = ?"
+	            authorities-by-username-query="select username, authority from authorities where username = ?"
+	        />
+		</authentication-provider> 
+	</authentication-manager>
+	
+</beans:beans>
+

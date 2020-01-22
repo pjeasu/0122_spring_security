@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans.xsd
+                                 http://www.springframework.org/schema/security
+                                 http://www.springframework.org/schema/security/spring-security.xsd">
+        
+        <!-- 기능 : 인증과 권한을 좀더 간편하고 쉽게하기 위한 프레임워크(라이브러리) -->
+        <!-- auto-config="true"를 설정한것만으로도 기본 로그인페이지 / http 기본 인증 / 로그아웃 기능등을 제공  -->
+         <!-- use-expressions="false" 를 설정하지 않으면 defualt가 false 이다. 이럴때는 SpEL을 사용하지 않는다.  -->
+         <http auto-config="true" use-expressions="false">
+            <intercept-url pattern="/**" access="ROLE_USER" />
+        </http> 
+        <!-- 이런식으로는 거의 사용하지 않는다 -->
+        
+        
+        <authentication-manager>
+            <authentication-provider>
+                <user-service>
+                    <user name="user" password="userPw" authorities="ROLE_USER"/>
+                    <user name="guest" password="guest" authorities="ROLE_GUEST"/>
+                </user-service>
+            </authentication-provider>
+        </authentication-manager>
+    
+</beans:beans>
